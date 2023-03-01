@@ -1,0 +1,32 @@
+//查询用户钱包余额
+public BigDecimal queryWalletBalance(Integer userId) {
+    BigDecimal balance = walletRepository.findByUserId(userId).getBalance();
+    return balance;
+}
+
+//用户消费100元的接口
+public boolean consumeMoney(Integer userId, BigDecimal amount) {
+    Wallet wallet = walletRepository.findByUserId(userId);
+    if (wallet.getBalance().compareTo(amount) < 0) {
+        return false;
+    }
+    wallet.setBalance(wallet.getBalance().subtract(amount));
+    wallet.setUpdateTime(new Date());
+    walletRepository.save(wallet);
+    return true;
+}
+
+//用户退款20元接口
+public boolean refundMoney(Integer userId, BigDecimal amount) {
+    Wallet wallet = walletRepository.findByUserId(userId);
+    wallet.setBalance(wallet.getBalance().add(amount));
+    wallet.setUpdateTime(new Date());
+    walletRepository.save(wallet);
+    return true;
+}
+
+//查询用户钱包金额变动明细的接口
+public List<Wallet> queryWalletChangeDetails(Integer userId) {
+    List<Wallet> walletList = walletRepository.findByUserIdOrderByUpdateTimeDesc(userId);
+    return walletList;
+}
